@@ -2,6 +2,9 @@
 #include <QApplication>
 #include <QPixmap>
 #include <QSplashScreen>
+#include <QStyle>
+#include <QScreen>
+#include <QGuiApplication>
 
 int main(int argc, char *argv[])
 {
@@ -12,13 +15,21 @@ int main(int argc, char *argv[])
         a.setFont(font);
 
 
-    QPixmap pixmap("C:\\Users\\dell\\Desktop\\eimo_ws\\robot\\04.png");
+    QPixmap pixmap(":/icons/splash.png");
 
-    QSplashScreen splash(pixmap);
+    QSplashScreen splash(pixmap.scaled(QSize(300,200),  Qt::KeepAspectRatio));
     splash.show();
     a.processEvents(); //相应其他事件
 
     MainWindow w;
+    w.setGeometry(
+       QStyle::alignedRect(
+           Qt::LeftToRight,
+           Qt::AlignCenter,
+           w.size(),
+           QGuiApplication::primaryScreen()->availableGeometry()
+       )
+    );
     w.show();
     splash.finish(&w);
     return a.exec();

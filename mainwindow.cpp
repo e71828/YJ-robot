@@ -1,6 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "qgc_udp_server.h"
+#include <QGridLayout>
+#include <QMediaPlayer>
+#include <QVideoWidget>
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -44,19 +47,17 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     //qgc[开启]/[关闭]按钮
-    ui->lineEdit_qgc_server_ip->setText("192.168.3.80"); //本地地址
-    ui->lineEdit_qgc_server_port->setText("8888");
-    qgc_server_ip = ui->lineEdit_qgc_server_ip->text();
-    qgc_server_port = ui->lineEdit_qgc_server_port->text().toInt();
-
+    ui->lineEdit_qgc_server_port->setText(QString::number(qgc_server_port));
+    ui->lineEdit_qgc_server_port->setAlignment(Qt::AlignCenter);
     connect(ui->OpenButton,&QPushButton::clicked,this,[this]()
     {
 
         if(ui->OpenButton->text()=="打开端口")
         {
             qgc_message = new qgc_udp_server;
-            connect(qgc_message,&qgc_udp_server::qgc_server_recv_message,this,&MainWindow::qgc_server_recv_data);
+            connect(qgc_message,&qgc_udp_server::qgc_server_recv_message,this,&MainWindow::update_data);
             qgc_udp_server();
+            updateData =1;
 
             //关闭设置菜单使能
             ui->OpenButton->setText(tr("关闭端口"));
@@ -64,6 +65,8 @@ MainWindow::MainWindow(QWidget *parent) :
         else
         {
             ui->OpenButton->setText(tr("打开端口"));
+
+            updateData=0;
 
         }
     });
@@ -74,6 +77,9 @@ MainWindow::MainWindow(QWidget *parent) :
       timer->start(100);						//(e)
       show_time();								//初始时间显示
       showColon=true;                            //初始化
+
+    //显示视频
+      show_video();
 
 }
 
@@ -152,31 +158,39 @@ void MainWindow::close_serial()
 
 void MainWindow::serial_message(int joy_1,int joy_2,int rotate_key,int knob_1,int knob_2,int knob_3,int knob_4,int rotate_cam_1,int rotate_cam_2,int switch_key,int switch_1,int switch_2,int btn_1,int btn_2)
 {
+    QFont FontSerialData("NanumGpthic-Bold", 20, QFont::Normal);
+
 
     ui->lineEdit_joy_1->setText(str_joy_1.setNum(joy_1));
-        ui->lineEdit_joy_1->setStyleSheet("font-size:24px");
+        ui->lineEdit_joy_1->setFont(FontSerialData);
+        ui->lineEdit_joy_1->setAlignment(Qt::AlignCenter);
     ui->lineEdit_joy_2->setText(str_joy_2.setNum(joy_2));
-        ui->lineEdit_joy_2->setStyleSheet("font-size:24px");
+        ui->lineEdit_joy_2->setFont(FontSerialData);
     ui->lineEdit_rotate_key->setText(str_rotate_key.setNum(rotate_key));
-        ui->lineEdit_rotate_key->setStyleSheet("font-size:24px");
+        ui->lineEdit_rotate_key->setFont(FontSerialData);
+        ui->lineEdit_rotate_key->setAlignment(Qt::AlignCenter);
     ui->lineEdit_knob_1->setText(str_knob_1.setNum(knob_1));
-        ui->lineEdit_knob_1->setStyleSheet("font-size:24px");
+        ui->lineEdit_knob_1->setFont(FontSerialData);
+        ui->lineEdit_knob_1->setAlignment(Qt::AlignCenter);
     ui->lineEdit_knob_2->setText(str_knob_2.setNum(knob_2));
-         ui->lineEdit_knob_2->setStyleSheet("font-size:24px");
+         ui->lineEdit_knob_2->setFont(FontSerialData);
+         ui->lineEdit_knob_2->setAlignment(Qt::AlignCenter);
     ui->lineEdit_knob_3->setText(str_knob_3.setNum(knob_3));
-        ui->lineEdit_knob_3->setStyleSheet("font-size:24px");
+        ui->lineEdit_knob_3->setFont(FontSerialData);
+        ui->lineEdit_knob_3->setAlignment(Qt::AlignCenter);
     ui->lineEdit_knob_4->setText(str_knob_4.setNum(knob_4));
-        ui->lineEdit_knob_4->setStyleSheet("font-size:24px");
+        ui->lineEdit_knob_4->setFont(FontSerialData);
+        ui->lineEdit_knob_4->setAlignment(Qt::AlignCenter);
 
 
     ui->lineEdit_rotate_cam_1->setText(str_rotate_cam_1.setNum(rotate_cam_1));
-        ui->lineEdit_rotate_cam_1->setStyleSheet("font-size:24px");
+        ui->lineEdit_rotate_cam_1->setFont(FontSerialData);
     ui->lineEdit_rotate_cam_2->setText(str_rotate_cam_2.setNum(rotate_cam_2));
-         ui->lineEdit_rotate_cam_2->setStyleSheet("font-size:24px");
+         ui->lineEdit_rotate_cam_2->setFont(FontSerialData);
     ui->lineEdit_switch_key->setText(str_switch_key.setNum(switch_key));
-         ui->lineEdit_switch_key->setStyleSheet("font-size:24px");
+         ui->lineEdit_switch_key->setFont(FontSerialData);
     //ui->lineEdit_switch_1->setText(str_switch_1.setNum(switch_1));
-        ui->lineEdit_switch_1->setStyleSheet("font-size:24px");
+        ui->lineEdit_switch_1->setFont(FontSerialData);
         if (switch_1 != 0 )
         {
             QPalette p=QPalette();
@@ -208,7 +222,7 @@ void MainWindow::serial_message(int joy_1,int joy_2,int rotate_key,int knob_1,in
         }
 
     ui->lineEdit_switch_2->setText(str_switch_2.setNum(switch_2));
-        ui->lineEdit_switch_2->setStyleSheet("font-size:24px");
+        ui->lineEdit_switch_2->setFont(FontSerialData);
         if (switch_2 != 0 )
         {
             if (switch_1 != 0 )
@@ -264,7 +278,7 @@ void MainWindow::serial_message(int joy_1,int joy_2,int rotate_key,int knob_1,in
 
         }
     ui->lineEdit_btn_1->setText(str_btn_1.setNum(btn_1));
-        ui->lineEdit_btn_1->setStyleSheet("font-size:24px");
+        ui->lineEdit_btn_1->setFont(FontSerialData);
         if (btn_1 != 0 )
         {
             if (switch_1 != 0 )
@@ -294,7 +308,7 @@ void MainWindow::serial_message(int joy_1,int joy_2,int rotate_key,int knob_1,in
             ui->lineEdit_btn_1->setPalette(p);
         }
     ui->lineEdit_btn_2->setText(str_btn_2.setNum(btn_2));
-        ui->lineEdit_btn_2->setStyleSheet("font-size:24px");
+        ui->lineEdit_btn_2->setFont(FontSerialData);
         if (btn_2 != 0 )
         {
             if (switch_1 != 0 )
@@ -324,10 +338,15 @@ void MainWindow::serial_message(int joy_1,int joy_2,int rotate_key,int knob_1,in
         }
 
 }
-void MainWindow::qgc_server_recv_data(int uuv_state,float uuv_roll,float uuv_pitch,float uuv_yaw,float uuv_depth,float uuv_voltage)
+void MainWindow::update_data(int uuv_state,float uuv_roll,float uuv_pitch,float uuv_yaw,float uuv_depth,float uuv_voltage)
 {
     //ui->lineEdit_state->setText(str_state.setNum(uuv_state));
-        ui->lineEdit_state->setStyleSheet("font-size:24px");
+
+        QFont FontUdpData("opensans", 16, QFont::Normal);
+
+        ui->lineEdit_state->setFont(FontUdpData);
+        ui->lineEdit_state->setAlignment(Qt::AlignCenter);
+
         if (uuv_state != 0 )
         {
             QPalette p=QPalette();
@@ -348,16 +367,17 @@ void MainWindow::qgc_server_recv_data(int uuv_state,float uuv_roll,float uuv_pit
         }
 
     ui->lineEdit_roll->setText(str_roll.setNum(uuv_roll));
-        ui->lineEdit_roll->setStyleSheet("font-size:24px");
+        ui->lineEdit_roll->setFont(FontUdpData);
+        ui->lineEdit_roll->setAlignment(Qt::AlignCenter);
     ui->lineEdit_pitch->setText(str_pitch.setNum(uuv_pitch));
-        ui->lineEdit_pitch->setStyleSheet("font-size:24px");
+        ui->lineEdit_pitch->setFont(FontUdpData);
+        ui->lineEdit_pitch->setAlignment(Qt::AlignCenter);
     ui->lineEdit_yaw->setText(str_yaw.setNum(uuv_yaw));
-        ui->lineEdit_yaw->setStyleSheet("font-size:24px");
+        ui->lineEdit_yaw->setFont(FontUdpData);
+        ui->lineEdit_yaw->setAlignment(Qt::AlignCenter);
     ui->lineEdit_depth->setText(str_depth.setNum(uuv_depth));
-        ui->lineEdit_depth->setStyleSheet("font-size:24px");
-    ui->lineEdit_voltage->setText(str_voltage.setNum(uuv_voltage));
-        ui->lineEdit_voltage->setStyleSheet("font-size:24px");
-
+        ui->lineEdit_depth->setFont(FontUdpData);
+        ui->lineEdit_depth->setAlignment(Qt::AlignCenter);
 }
 
 void MainWindow::changeDuration(qint64 seconds)
@@ -368,9 +388,8 @@ void MainWindow::changeDuration(qint64 seconds)
 void MainWindow::show_time()
 {
     QDateTime time=QDateTime::currentDateTime();			    //(a)
-   // QString Text=time.toString("yyyy年/MM月/dd日/ddd  hh:mm:ss");		//(b)
-    QString Text=time.toString("yyyy/MM/dd/ hh:mm:ss");		//(b)
-
+//    QString Text=time.toString("yyyy年/MM月/dd日/ddd  hh:mm:ss");		//(b)
+    QString Text=time.toString("MM/dd/yyyy hh:mm:ss ");		//(b)
    // qDebug()<<Text;
     if(showColon)
     {
@@ -384,9 +403,42 @@ void MainWindow::show_time()
         //Text[24]=' ';
         showColon=true;
     }
-    ui->lineEdit_time->setText(Text);    
-    ui->lineEdit_time->setStyleSheet("font-size:24px");
+    Text.prepend(QString::number(qgc_server_port) + "  Time: ");
+    Text.prepend(qgc_server_ip + ":");
+    Text.prepend("Local UDP Address: ");
+    ui->label_status->setText(Text);
+    QFont NanumGothic_R("NanumGothic-Regular", 10, QFont::Normal);
+    ui->statusBar->addPermanentWidget( ui->label_status,0);
+    ui->label_status->setFont(NanumGothic_R);
 
+}
+
+void MainWindow::show_video()
+{
+    // Criando 4 QVideoWidget
+    QVideoWidget *_vw1 = new QVideoWidget;
+//    QVideoWidget *_vw2 = new QVideoWidget;
+    // Criando 4 QMediaPlayer
+    QMediaPlayer *_player1 = new QMediaPlayer;
+//    QMediaPlayer *_player2 = new QMediaPlayer;
+    // Criando um QGridLayout de 2x1
+    QGridLayout *layout = new QGridLayout;
+    layout->addWidget(_vw1,0,0,1,1);
+//    layout->addWidget(_vw2,0,1,1,1);
+//    QWidget *win = new QWidget();
+//    win->setLayout(layout);
+    ui->widget_video->setLayout(layout);
+    // QMediaPlayer -> QVideoWidget
+    _player1->setVideoOutput(_vw1);
+//    _player2->setVideoOutput(_vw2);
+    // Links de RTSP e Videos
+    const QUrl url1 = QUrl("rtsp://192.168.31.16:8555/unicast");
+//    const QUrl url2 = QUrl("rtsp://192.168.31.15:8555/unicast");
+      const QNetworkRequest requestRtsp1(url1);
+      _player1->setMedia(requestRtsp1);
+//    _player2->setMedia(requestRtsp2);
+      _player1->play();
+//    _player2->play();
 }
 MainWindow::~MainWindow()
 {

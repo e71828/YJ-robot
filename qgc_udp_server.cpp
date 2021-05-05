@@ -1,8 +1,8 @@
 #include "qgc_udp_server.h"
 #include "mainwindow.h"
 
-QString qgc_server_ip;
-int qgc_server_port;
+QString qgc_server_ip="192.168.31.221";
+int qgc_server_port=8888;
 
 int remote_x,remote_y,remote_key,remote_knob_1,remote_knob_2,remote_knob_3,remote_knob_4;
 int remote_cam_1,remote_cam_2,remote_switch_key,remote_switch_1,remote_switch_2,remote_btn_1,remote_btn_2;
@@ -37,7 +37,7 @@ void qgc_udp_server::qgc_server_recv_data()
     }
     sscanf(qgc_recv_msg.data(), "%[^,],%d,%f,%f,%f,%f,%f,%s\n",data_first,&uuv_0,&uuv_1,&uuv_2,&uuv_3,&uuv_4,&uuv_5,data_last);
 
-    qgc_server_recv_message(uuv_0, uuv_1, uuv_2, uuv_3, uuv_4, uuv_5);
+    emit qgc_server_recv_message(uuv_0, uuv_1, uuv_2, uuv_3, uuv_4, uuv_5);
 
     qgc_server_send_data();
 
@@ -53,9 +53,9 @@ void qgc_udp_server::qgc_server_send_data()
         {
             rotate_key = 0;
         }
-        else if (remote_key >= 10000)
+        else if (remote_key >= 1000)
         {
-            rotate_key = 10000;
+            rotate_key = 1000;
         }
     }
 
@@ -77,7 +77,7 @@ void qgc_udp_server::qgc_server_send_data()
             }
             else
             {
-                knob_3 =  0.5*remote_knob_3;
+                knob_3 =  remote_knob_3;
                 knob_4 = 0 ;
             }
                 cam_1 = remote_cam_1;
@@ -107,7 +107,7 @@ void qgc_udp_server::qgc_server_send_data()
             joy_x,joy_y,rotate_key,knob_1,knob_2,knob_3,knob_4,cam_1,cam_2,btn_1,btn_2,"#");
 
 
-    QHostAddress serverAddress = QHostAddress("192.168.3.88");
+    QHostAddress serverAddress = QHostAddress("192.168.31.16");
     socket->writeDatagram(char_data,sizeof(char_data),QHostAddress(serverAddress),8888);
 
     qDebug()<<"server send:";

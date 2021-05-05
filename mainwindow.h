@@ -63,6 +63,7 @@ public:
     void close_serial();
 
     void serial_write_data();
+    void show_video();
 
     //recv sensor data
       int   uuv_state;
@@ -83,9 +84,10 @@ private slots:
 
     void show_time();            //显示当前的时间
 
-    void qgc_server_recv_data(int uuv_state,float uuv_roll,float uuv_pitch,float uuv_yaw,float uuv_depth,float uuv_voltage);
+    void update_data(int uuv_state,float uuv_roll,float uuv_pitch,float uuv_yaw,float uuv_depth,float uuv_voltage);
 
     void changeDuration(qint64 seconds);
+
 
 
 private:
@@ -118,6 +120,7 @@ private:
     QString str_Text;
 
     bool showColon;             //用于显示时间时是否显示“:”
+    bool updateData;
 
     Ui::MainWindow *ui;
 

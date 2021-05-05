@@ -6,7 +6,7 @@ pc_udp_client::pc_udp_client(QObject *parent) :
 {
 
     socket = new QUdpSocket(this);
-    socket->bind(QHostAddress("192.168.3.80"), 8881); //本地地址
+    socket->bind(QHostAddress("192.168.31.221"), 8881); //本地地址
     pc_client_send_data();
 }
 
@@ -62,7 +62,7 @@ void pc_udp_client::pc_client_send_data()
             cam_1 = remote_cam_1;
             cam_2 = remote_cam_2;
       }
-     height_p=250.25; height_i=250.25; heigh_d=250.25; height_i_limit=100.25; height_out_limit=100.25;   //PID
+     height_p=250.25; height_i=250.25; heigh_d=250.25; height_i_limit=100.25; height_out_limit=100.25;
      motor_p=250.25; motor_i=250.25; motor_d=250.25; motor_i_limit=100.25; motor_out_limit=100.25;
      locate_p=250.25; locate_i=250.25; locate_d=250.25; locate_i_limit=250.25; locate_out_limit=250.25;
 
@@ -75,7 +75,7 @@ void pc_udp_client::pc_client_send_data()
             joy_x,joy_y,rotate_key,knob_1,knob_2,knob_3,knob_4,cam_1,cam_2,btn_1,btn_2,"#");
 
 
-    QHostAddress serverAddress = QHostAddress("192.168.3.88");
+    QHostAddress serverAddress = QHostAddress("192.168.31.221");
     socket->writeDatagram(char_data,sizeof(char_data),QHostAddress(serverAddress),8882);
 
     qDebug()<<"server send:";
