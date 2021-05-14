@@ -25,6 +25,11 @@ using namespace std;
 extern QString qgc_server_ip;
 extern int qgc_server_port;
 
+extern QString dest_server_ip;
+extern int dest_server_port;
+
+extern int qgc_video1_port;
+extern int qgc_video2_port;
 
 extern int remote_x,remote_y,remote_key,remote_knob_1,remote_knob_2,remote_knob_3,remote_knob_4;
 extern int remote_cam_1,remote_cam_2,remote_switch_key,remote_switch_1,remote_switch_2,remote_btn_1,remote_btn_2;

@@ -29,12 +29,10 @@ RC_ICONS = resources/icons/qgroundcontrol.ico
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-        pc_udp_client.cpp \
         qgc_udp_server.cpp
 
 HEADERS += \
         mainwindow.h \
-        pc_udp_client.h \
         qgc_udp_server.h
 
 FORMS += \

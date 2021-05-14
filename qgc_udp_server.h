@@ -15,7 +15,7 @@ public:
     explicit qgc_udp_server(QObject *parent = nullptr);
     ~qgc_udp_server();
 
-    void qgc_server_send_data();
+//    void qgc_server_send_data();
 
     int uuv_0;
     float uuv_1,uuv_2,uuv_3,uuv_4,uuv_5;
@@ -34,6 +34,8 @@ signals:
 public slots:
 
     void qgc_server_recv_data();
+
+    void qgc_server_send_data();
 
 private:
 

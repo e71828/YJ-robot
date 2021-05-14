@@ -1,11 +1,14 @@
 #include "qgc_udp_server.h"
 #include "mainwindow.h"
 
-QString qgc_server_ip="192.168.31.221";
-int qgc_server_port=8888;
-
 int remote_x,remote_y,remote_key,remote_knob_1,remote_knob_2,remote_knob_3,remote_knob_4;
 int remote_cam_1,remote_cam_2,remote_switch_key,remote_switch_1,remote_switch_2,remote_btn_1,remote_btn_2;
+
+extern QString dest_server_ip;
+extern int dest_server_port;
+
+extern QString qgc_server_ip;
+extern int qgc_server_port;
 
 qgc_udp_server::qgc_udp_server(QObject *parent) :
     QObject(parent)
@@ -15,9 +18,7 @@ qgc_udp_server::qgc_udp_server(QObject *parent) :
 
     socket->bind(QHostAddress(qgc_server_ip), qgc_server_port);
 
-    qDebug()<<"qgc_server_:"<<qgc_server_ip<<qgc_server_port;
-
-    qgc_server_send_data();
+//    qgc_server_send_data();
 
     connect(socket, SIGNAL(readyRead()), this, SLOT(qgc_server_recv_data()));
 
@@ -39,7 +40,7 @@ void qgc_udp_server::qgc_server_recv_data()
 
     emit qgc_server_recv_message(uuv_0, uuv_1, uuv_2, uuv_3, uuv_4, uuv_5);
 
-    qgc_server_send_data();
+//    qgc_server_send_data();
 
 }
 
@@ -106,9 +107,7 @@ void qgc_udp_server::qgc_server_send_data()
             locate_p,locate_i,locate_d,locate_i_limit,locate_out_limit,
             joy_x,joy_y,rotate_key,knob_1,knob_2,knob_3,knob_4,cam_1,cam_2,btn_1,btn_2,"#");
 
-
-    QHostAddress serverAddress = QHostAddress("192.168.31.16");
-    socket->writeDatagram(char_data,sizeof(char_data),QHostAddress(serverAddress),8888);
+    socket->writeDatagram(char_data,sizeof(char_data),QHostAddress(dest_server_ip),dest_server_port);
 
     qDebug()<<"server send:";
     qDebug()<<char_data;
@@ -117,6 +116,6 @@ void qgc_udp_server::qgc_server_send_data()
 
 qgc_udp_server::~qgc_udp_server()
 {
-    delete socket;
-
+    socket->close();
+    socket->deleteLater();
 }

@@ -56,8 +56,11 @@ MainWindow::MainWindow(QWidget *parent) :
         {
             qgc_message = new qgc_udp_server;
             connect(qgc_message,&qgc_udp_server::qgc_server_recv_message,this,&MainWindow::update_data);
-            qgc_udp_server();
             updateData =1;
+
+            QTimer *timer0 =new QTimer(this);			//新建一个定时器对象
+            connect(timer0,&QTimer::timeout,qgc_message,&qgc_udp_server::qgc_server_send_data);
+            timer0->start(100);
 
             //关闭设置菜单使能
             ui->OpenButton->setText(tr("关闭端口"));
@@ -65,6 +68,8 @@ MainWindow::MainWindow(QWidget *parent) :
         else
         {
             ui->OpenButton->setText(tr("打开端口"));
+            qgc_message->disconnect();
+            qgc_message->deleteLater();
 
             updateData=0;
 
@@ -80,6 +85,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //显示视频
       show_video();
+
+    //置零
+      //update_data(0, 0.0, 0.0, 0.0, 0.0, 0.0);
 
 }
 
@@ -164,8 +172,10 @@ void MainWindow::serial_message(int joy_1,int joy_2,int rotate_key,int knob_1,in
     ui->lineEdit_joy_1->setText(str_joy_1.setNum(joy_1));
         ui->lineEdit_joy_1->setFont(FontSerialData);
         ui->lineEdit_joy_1->setAlignment(Qt::AlignCenter);
+        ui->lineEdit_joy_1->setAlignment(Qt::AlignCenter);
     ui->lineEdit_joy_2->setText(str_joy_2.setNum(joy_2));
         ui->lineEdit_joy_2->setFont(FontSerialData);
+        ui->lineEdit_joy_2->setAlignment(Qt::AlignCenter);
     ui->lineEdit_rotate_key->setText(str_rotate_key.setNum(rotate_key));
         ui->lineEdit_rotate_key->setFont(FontSerialData);
         ui->lineEdit_rotate_key->setAlignment(Qt::AlignCenter);
@@ -185,12 +195,16 @@ void MainWindow::serial_message(int joy_1,int joy_2,int rotate_key,int knob_1,in
 
     ui->lineEdit_rotate_cam_1->setText(str_rotate_cam_1.setNum(rotate_cam_1));
         ui->lineEdit_rotate_cam_1->setFont(FontSerialData);
+        ui->lineEdit_rotate_cam_1->setAlignment(Qt::AlignCenter);
     ui->lineEdit_rotate_cam_2->setText(str_rotate_cam_2.setNum(rotate_cam_2));
          ui->lineEdit_rotate_cam_2->setFont(FontSerialData);
+         ui->lineEdit_rotate_cam_2->setAlignment(Qt::AlignCenter);
     ui->lineEdit_switch_key->setText(str_switch_key.setNum(switch_key));
          ui->lineEdit_switch_key->setFont(FontSerialData);
+         ui->lineEdit_switch_key->setAlignment(Qt::AlignCenter);
     //ui->lineEdit_switch_1->setText(str_switch_1.setNum(switch_1));
         ui->lineEdit_switch_1->setFont(FontSerialData);
+        ui->lineEdit_switch_1->setAlignment(Qt::AlignCenter);
         if (switch_1 != 0 )
         {
             QPalette p=QPalette();
@@ -221,8 +235,9 @@ void MainWindow::serial_message(int joy_1,int joy_2,int rotate_key,int knob_1,in
             ui->lineEdit_btn_2->setPalette(p);
         }
 
-    ui->lineEdit_switch_2->setText(str_switch_2.setNum(switch_2));
+        ui->lineEdit_switch_2->setText(str_switch_2.setNum(switch_2));
         ui->lineEdit_switch_2->setFont(FontSerialData);
+        ui->lineEdit_switch_2->setAlignment(Qt::AlignCenter);
         if (switch_2 != 0 )
         {
             if (switch_1 != 0 )
@@ -279,6 +294,7 @@ void MainWindow::serial_message(int joy_1,int joy_2,int rotate_key,int knob_1,in
         }
     ui->lineEdit_btn_1->setText(str_btn_1.setNum(btn_1));
         ui->lineEdit_btn_1->setFont(FontSerialData);
+        ui->lineEdit_btn_1->setAlignment(Qt::AlignCenter);
         if (btn_1 != 0 )
         {
             if (switch_1 != 0 )
@@ -309,6 +325,7 @@ void MainWindow::serial_message(int joy_1,int joy_2,int rotate_key,int knob_1,in
         }
     ui->lineEdit_btn_2->setText(str_btn_2.setNum(btn_2));
         ui->lineEdit_btn_2->setFont(FontSerialData);
+        ui->lineEdit_btn_2->setAlignment(Qt::AlignCenter);
         if (btn_2 != 0 )
         {
             if (switch_1 != 0 )
@@ -318,6 +335,7 @@ void MainWindow::serial_message(int joy_1,int joy_2,int rotate_key,int knob_1,in
                 p.setColor(QPalette::WindowText,Qt::green);
                 p.setColor(QPalette::Background,QColor(0,255,0,255));
                 ui->lineEdit_btn_2->setPalette(p);
+
             }
             else
             {
@@ -326,6 +344,7 @@ void MainWindow::serial_message(int joy_1,int joy_2,int rotate_key,int knob_1,in
                 p.setColor(QPalette::WindowText,Qt::red);
                 p.setColor(QPalette::Background,QColor(255,0,0,255));
                 ui->lineEdit_btn_2->setPalette(p);
+
             }
         }
         else
@@ -375,6 +394,8 @@ void MainWindow::update_data(int uuv_state,float uuv_roll,float uuv_pitch,float 
     ui->lineEdit_yaw->setText(str_yaw.setNum(uuv_yaw));
         ui->lineEdit_yaw->setFont(FontUdpData);
         ui->lineEdit_yaw->setAlignment(Qt::AlignCenter);
+//        qDebug()<<uuv_yaw;
+//        if (uuv_depth < 1e-2 || uuv_depth > 1e9) uuv_depth =0;
     ui->lineEdit_depth->setText(str_depth.setNum(uuv_depth));
         ui->lineEdit_depth->setFont(FontUdpData);
         ui->lineEdit_depth->setAlignment(Qt::AlignCenter);
@@ -432,8 +453,16 @@ void MainWindow::show_video()
     _player1->setVideoOutput(_vw1);
 //    _player2->setVideoOutput(_vw2);
     // Links de RTSP e Videos
-    const QUrl url1 = QUrl("rtsp://192.168.31.16:8555/unicast");
-//    const QUrl url2 = QUrl("rtsp://192.168.31.15:8555/unicast");
+    QString nbSource1 =dest_server_ip;
+    nbSource1.append(":" + QString::number(qgc_video1_port));
+    nbSource1.prepend("rtsp://");
+    nbSource1.append("/unicast");
+    QString nbSource2 =dest_server_ip;
+    nbSource2.append(":" + QString::number(qgc_video2_port));
+    nbSource2.prepend("rtsp://");
+    nbSource2.append("/unicast");
+    const QUrl url1 = QUrl(nbSource1);
+//    const QUrl url2 = QUrl(nbSource2);
       const QNetworkRequest requestRtsp1(url1);
       _player1->setMedia(requestRtsp1);
 //    _player2->setMedia(requestRtsp2);
@@ -442,6 +471,7 @@ void MainWindow::show_video()
 }
 MainWindow::~MainWindow()
 {
+    delete qgc_message;
     delete ui;
     close();
 }
