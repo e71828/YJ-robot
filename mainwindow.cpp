@@ -1,9 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "qgc_udp_server.h"
-#include <QGridLayout>
-#include <QMediaPlayer>
-#include <QVideoWidget>
+
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -14,18 +12,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     setWindowTitle(" 油浸式变压器检测机器人控制系统 ");
 
-
-    //查找可用的串口
-    foreach (const QSerialPortInfo &info,QSerialPortInfo::availablePorts())
-    {
-        QSerialPort serial;
-        serial.setPort(info);
-        if(serial.open(QIODevice::ReadWrite))
-        {
-            ui->PortBox->addItem(serial.portName());
-            serial.close();
-        }
-    }
+    ui->PortBox->installEventFilter(this);
+    find_serial();
 
     //点击串口[开启]/[关闭]按钮
     connect(ui->OpenSerialButton,&QPushButton::clicked,this,[this]()
@@ -98,6 +86,39 @@ void sleep(unsigned int msec)
         QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 }
 
+
+bool MainWindow::eventFilter(QObject *obj, QEvent *event)
+{
+    if(event->type() == QEvent::MouseButtonPress)
+    {
+        if(obj == ui->PortBox)
+        {
+            //处理鼠标点击事件
+            QComboBox * combobox = qobject_cast<QComboBox *>(obj);
+
+            combobox->clear();
+            find_serial();
+        }
+    }
+
+    return QWidget::eventFilter(obj, event);
+}
+
+void MainWindow::find_serial()
+{
+    //查找可用的串口
+    foreach (const QSerialPortInfo &info,QSerialPortInfo::availablePorts())
+    {
+        QSerialPort serial;
+        serial.setPort(info);
+        if(serial.open(QIODevice::ReadWrite))
+        {
+            ui->PortBox->addItem(serial.portName());
+            serial.close();
+        }
+    }
+}
+
 void MainWindow::open_serial()
 {
     serial = new QSerialPort;
@@ -119,7 +140,7 @@ void MainWindow::open_serial()
     serial->setFlowControl(QSerialPort::NoFlowControl);//设置为无流控制
 
     //关闭设置菜单使能
-    ui->OpenSerialButton->setText(tr("关闭串口"));
+    //ui->OpenSerialButton->setText(tr("关闭串口"));
 
     //连接信号槽
     QObject::connect(serial,&QSerialPort::readyRead,this,&MainWindow::serial_read_data);
@@ -129,30 +150,33 @@ void MainWindow::open_serial()
 //读取接收到的信息
 void MainWindow::serial_read_data()
 {
-    sleep(10);
     char data_first[16];char data_last[16];
     QByteArray read_buf;
-    QString str = "";
+
     read_buf = serial->readAll();
-    if(!read_buf.isEmpty())
+
+    qDebug()<<  read_buf;
+
+    if(read_buf.back() == '\n')
     {
-        str+=tr(read_buf);
+        joy_data.append(read_buf);
+        qDebug()<< "read data:=============================================";
+        qDebug()<<  joy_data;
+
+        sscanf(joy_data, "%[^,],%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%s\r\n",data_first,&joy_1,&joy_2,&rotate_key,
+               &knob_1,&knob_2,&knob_3,&knob_4,&rotate_cam_1,&rotate_cam_2,&switch_key,&switch_1,&switch_2,&btn_1,&btn_2,data_last);
+        remote_x = joy_1;remote_y = joy_2;remote_key=rotate_key;remote_knob_1 = knob_1;remote_knob_2 = knob_2;remote_knob_3 = knob_3;remote_knob_4 = knob_4;
+        remote_cam_1 = rotate_cam_1;remote_cam_2 = rotate_cam_2;remote_switch_key = switch_key;remote_switch_1 = switch_1;remote_switch_2 = switch_2;remote_btn_1 = btn_1;remote_btn_2 = btn_2;
+
+        qDebug()<<  data_last;
+        serial_message(joy_1,joy_2,rotate_key,knob_1,knob_2,knob_3,knob_4,rotate_cam_1,rotate_cam_2,switch_key,switch_1,switch_2,btn_1,btn_2);
+
+        joy_data.clear();
+    } else{
+
+        joy_data.append(read_buf);
+
     }
-
-    qDebug()<< "read data";
-    qDebug()<<  str;
-
-    QByteArray joy_data = str.toLatin1(); // must
-    qDebug()<<  joy_data;
-
-    sscanf(joy_data, "%[^,],%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%s\r\n",data_first,&joy_1,&joy_2,&rotate_key,
-           &knob_1,&knob_2,&knob_3,&knob_4,&rotate_cam_1,&rotate_cam_2,&switch_key,&switch_1,&switch_2,&btn_1,&btn_2,data_last);
-
-     remote_x = joy_1;remote_y = joy_2;remote_key=rotate_key;remote_knob_1 = knob_1;remote_knob_2 = knob_2;remote_knob_3 = knob_3;remote_knob_4 = knob_4;
-     remote_cam_1 = rotate_cam_1;remote_cam_2 = rotate_cam_2;remote_switch_key = switch_key;remote_switch_1 = switch_1;remote_switch_2 = switch_2;remote_btn_1 = btn_1;remote_btn_2 = btn_2;
-
-    serial_message(joy_1,joy_2,rotate_key,knob_1,knob_2,knob_3,knob_4,rotate_cam_1,rotate_cam_2,switch_key,switch_1,switch_2,btn_1,btn_2);
-
 }
 
 void MainWindow::close_serial()
@@ -161,6 +185,20 @@ void MainWindow::close_serial()
     serial->clear();
     serial->close();
     serial->deleteLater();
+    ui->lineEdit_joy_1->clear();
+    ui->lineEdit_joy_2->clear();
+    ui->lineEdit_rotate_key->clear();
+    ui->lineEdit_knob_1->clear();
+    ui->lineEdit_knob_2->clear();
+    ui->lineEdit_knob_3->clear();
+    ui->lineEdit_knob_4->clear();
+    ui->lineEdit_rotate_cam_1->clear();
+    ui->lineEdit_rotate_cam_2->clear();
+    ui->lineEdit_switch_key->clear();
+    ui->lineEdit_switch_1->clear();
+    ui->lineEdit_switch_2->clear();
+    ui->lineEdit_btn_1->clear();
+    ui->lineEdit_btn_2->clear();
 
 }
 
@@ -171,7 +209,6 @@ void MainWindow::serial_message(int joy_1,int joy_2,int rotate_key,int knob_1,in
 
     ui->lineEdit_joy_1->setText(str_joy_1.setNum(joy_1));
         ui->lineEdit_joy_1->setFont(FontSerialData);
-        ui->lineEdit_joy_1->setAlignment(Qt::AlignCenter);
         ui->lineEdit_joy_1->setAlignment(Qt::AlignCenter);
     ui->lineEdit_joy_2->setText(str_joy_2.setNum(joy_2));
         ui->lineEdit_joy_2->setFont(FontSerialData);
@@ -205,34 +242,55 @@ void MainWindow::serial_message(int joy_1,int joy_2,int rotate_key,int knob_1,in
     //ui->lineEdit_switch_1->setText(str_switch_1.setNum(switch_1));
         ui->lineEdit_switch_1->setFont(FontSerialData);
         ui->lineEdit_switch_1->setAlignment(Qt::AlignCenter);
+
+        QPalette org=QPalette();
+        org.setColor(QPalette::Base,Qt::white);
+        org.setColor(QPalette::WindowText,Qt::white);
+        org.setColor(QPalette::Background,QColor(255,255,255,255));
+
+        QPalette pass=QPalette();
+        pass.setColor(QPalette::Base,Qt::green);
+        pass.setColor(QPalette::WindowText,Qt::green);
+        pass.setColor(QPalette::Background,QColor(0,255,0,255));
+
+        QPalette error=QPalette();
+        error.setColor(QPalette::Base,Qt::red);
+        error.setColor(QPalette::WindowText,Qt::red);
+        error.setColor(QPalette::Background,QColor(255,0,0,255));
+
+        QPalette war=QPalette();
+        war.setColor(QPalette::Base,Qt::yellow);
+        war.setColor(QPalette::WindowText,Qt::yellow);
+        war.setColor(QPalette::Background,QColor(255,255,0,255));
+
         if (switch_1 != 0 )
         {
-            QPalette p=QPalette();
-            p.setColor(QPalette::Base,Qt::green);
-            p.setColor(QPalette::WindowText,Qt::green);
-            p.setColor(QPalette::Background,QColor(0,255,0,255));
-            ui->lineEdit_switch_1->setPalette(p);
+            ui->lineEdit_switch_1->setPalette(pass);
+            ui->lineEdit_joy_1->setPalette(org);
+            ui->lineEdit_joy_2->setPalette(org);
+            ui->lineEdit_rotate_key->setPalette(org);
+            ui->lineEdit_knob_1->setPalette(org);
+            ui->lineEdit_knob_2->setPalette(org);
+            ui->lineEdit_rotate_cam_1->setPalette(org);
+            ui->lineEdit_rotate_cam_2->setPalette(org);
+            ui->lineEdit_switch_key->setPalette(org);
         }
         else
         {
-            QPalette p=QPalette();
-            p.setColor(QPalette::Base,Qt::red);
-            p.setColor(QPalette::WindowText,Qt::red);
-            p.setColor(QPalette::Background,QColor(255,0,0,255));
-            ui->lineEdit_joy_1->setPalette(p);
-            ui->lineEdit_joy_2->setPalette(p);
-            ui->lineEdit_rotate_key->setPalette(p);
-            ui->lineEdit_knob_1->setPalette(p);
-            ui->lineEdit_knob_2->setPalette(p);
-            ui->lineEdit_knob_3->setPalette(p);
-            ui->lineEdit_knob_4->setPalette(p);
-            ui->lineEdit_rotate_cam_1->setPalette(p);
-            ui->lineEdit_rotate_cam_2->setPalette(p);
-            ui->lineEdit_switch_key->setPalette(p);
-            ui->lineEdit_switch_1->setPalette(p);
-            ui->lineEdit_switch_2->setPalette(p);
-            ui->lineEdit_btn_1->setPalette(p);
-            ui->lineEdit_btn_2->setPalette(p);
+            ui->lineEdit_joy_1->setPalette(error);
+            ui->lineEdit_joy_2->setPalette(error);
+            ui->lineEdit_rotate_key->setPalette(error);
+            ui->lineEdit_knob_1->setPalette(error);
+            ui->lineEdit_knob_2->setPalette(error);
+            ui->lineEdit_knob_3->setPalette(error);
+            ui->lineEdit_knob_4->setPalette(error);
+            ui->lineEdit_rotate_cam_1->setPalette(error);
+            ui->lineEdit_rotate_cam_2->setPalette(error);
+            ui->lineEdit_switch_key->setPalette(error);
+            ui->lineEdit_switch_1->setPalette(error);
+            ui->lineEdit_switch_2->setPalette(error);
+            ui->lineEdit_btn_1->setPalette(error);
+            ui->lineEdit_btn_2->setPalette(error);
         }
 
         ui->lineEdit_switch_2->setText(str_switch_2.setNum(switch_2));
@@ -242,21 +300,15 @@ void MainWindow::serial_message(int joy_1,int joy_2,int rotate_key,int knob_1,in
         {
             if (switch_1 != 0 )
             {
-                QPalette p=QPalette();
-                p.setColor(QPalette::Base,Qt::green);
-                p.setColor(QPalette::WindowText,Qt::green);
-                p.setColor(QPalette::Background,QColor(0,255,0,255));
-                ui->lineEdit_switch_2->setPalette(p);
-                ui->lineEdit_knob_4->setPalette(p);
+                ui->lineEdit_switch_2->setPalette(pass);
+                ui->lineEdit_knob_3->setPalette(error);
+                ui->lineEdit_knob_4->setPalette(pass);
             }
             else
             {
-                QPalette p=QPalette();
-                p.setColor(QPalette::Base,Qt::red);
-                p.setColor(QPalette::WindowText,Qt::red);
-                p.setColor(QPalette::Background,QColor(255,0,0,255));
-                ui->lineEdit_switch_2->setPalette(p);
-                ui->lineEdit_knob_4->setPalette(p);
+                ui->lineEdit_switch_2->setPalette(error);
+                ui->lineEdit_knob_3->setPalette(error);
+                ui->lineEdit_knob_4->setPalette(error);
             }
 
         }
@@ -264,31 +316,15 @@ void MainWindow::serial_message(int joy_1,int joy_2,int rotate_key,int knob_1,in
         {
             if (switch_1 != 0 )
             {
-                QPalette p=QPalette();
-                p.setColor(QPalette::Base,Qt::yellow);
-                p.setColor(QPalette::WindowText,Qt::yellow);
-                p.setColor(QPalette::Background,QColor(255,255,0,255));
-                ui->lineEdit_switch_2->setPalette(p);
-
-                QPalette p1=QPalette();
-                p1.setColor(QPalette::Base,Qt::yellow);
-                p1.setColor(QPalette::WindowText,Qt::yellow);
-                p1.setColor(QPalette::Background,QColor(255,255,0,255));
-                ui->lineEdit_knob_3->setPalette(p1);
+                ui->lineEdit_switch_2->setPalette(war);
+                ui->lineEdit_knob_3->setPalette(war);
+                ui->lineEdit_knob_4->setPalette(error);
             }
             else
             {
-                QPalette p=QPalette();
-                p.setColor(QPalette::Base,Qt::red);
-                p.setColor(QPalette::WindowText,Qt::red);
-                p.setColor(QPalette::Background,QColor(255,0,0,255));
-                ui->lineEdit_switch_2->setPalette(p);
-
-                QPalette p1=QPalette();
-                p1.setColor(QPalette::Base,Qt::red);
-                p1.setColor(QPalette::WindowText,Qt::red);
-                p1.setColor(QPalette::Background,QColor(255,0,0,255));
-                ui->lineEdit_knob_3->setPalette(p1);
+                ui->lineEdit_switch_2->setPalette(error);
+                ui->lineEdit_knob_3->setPalette(error);
+                ui->lineEdit_knob_4->setPalette(error);
             }
 
         }
@@ -299,29 +335,17 @@ void MainWindow::serial_message(int joy_1,int joy_2,int rotate_key,int knob_1,in
         {
             if (switch_1 != 0 )
             {
-                QPalette p=QPalette();
-                p.setColor(QPalette::Base,Qt::green);
-                p.setColor(QPalette::WindowText,Qt::green);
-                p.setColor(QPalette::Background,QColor(0,255,0,255));
-                ui->lineEdit_btn_1->setPalette(p);
+                ui->lineEdit_btn_1->setPalette(pass);
             }
             else
             {
-                QPalette p=QPalette();
-                p.setColor(QPalette::Base,Qt::red);
-                p.setColor(QPalette::WindowText,Qt::red);
-                p.setColor(QPalette::Background,QColor(255,0,0,255));
-                ui->lineEdit_btn_1->setPalette(p);
+                ui->lineEdit_btn_1->setPalette(error);
             }
 
         }
         else
         {
-            QPalette p=QPalette();
-            p.setColor(QPalette::Base,Qt::red);
-            p.setColor(QPalette::WindowText,Qt::red);
-            p.setColor(QPalette::Background,QColor(255,0,0,255));
-            ui->lineEdit_btn_1->setPalette(p);
+            ui->lineEdit_btn_1->setPalette(error);
         }
     ui->lineEdit_btn_2->setText(str_btn_2.setNum(btn_2));
         ui->lineEdit_btn_2->setFont(FontSerialData);
@@ -330,30 +354,17 @@ void MainWindow::serial_message(int joy_1,int joy_2,int rotate_key,int knob_1,in
         {
             if (switch_1 != 0 )
             {
-                QPalette p=QPalette();
-                p.setColor(QPalette::Base,Qt::green);
-                p.setColor(QPalette::WindowText,Qt::green);
-                p.setColor(QPalette::Background,QColor(0,255,0,255));
-                ui->lineEdit_btn_2->setPalette(p);
-
+                ui->lineEdit_btn_2->setPalette(pass);
             }
             else
             {
-                QPalette p=QPalette();
-                p.setColor(QPalette::Base,Qt::red);
-                p.setColor(QPalette::WindowText,Qt::red);
-                p.setColor(QPalette::Background,QColor(255,0,0,255));
-                ui->lineEdit_btn_2->setPalette(p);
+                ui->lineEdit_btn_2->setPalette(error);
 
             }
         }
         else
         {
-            QPalette p=QPalette();
-            p.setColor(QPalette::Base,Qt::red);
-            p.setColor(QPalette::WindowText,Qt::red);
-            p.setColor(QPalette::Background,QColor(255,0,0,255));
-            ui->lineEdit_btn_2->setPalette(p);
+            ui->lineEdit_btn_2->setPalette(error);
         }
 
 }
@@ -362,9 +373,6 @@ void MainWindow::update_data(int uuv_state,float uuv_roll,float uuv_pitch,float 
     //ui->lineEdit_state->setText(str_state.setNum(uuv_state));
 
         QFont FontUdpData("opensans", 16, QFont::Normal);
-
-        ui->lineEdit_state->setFont(FontUdpData);
-        ui->lineEdit_state->setAlignment(Qt::AlignCenter);
 
         if (uuv_state != 0 )
         {
@@ -462,6 +470,7 @@ void MainWindow::show_video()
     nbSource2.prepend("rtsp://");
     nbSource2.append("/unicast");
     const QUrl url1 = QUrl(nbSource1);
+    qDebug()<<nbSource1;
 //    const QUrl url2 = QUrl(nbSource2);
       const QNetworkRequest requestRtsp1(url1);
       _player1->setMedia(requestRtsp1);
@@ -474,4 +483,8 @@ MainWindow::~MainWindow()
     delete qgc_message;
     delete ui;
     close();
+}
+
+void MainWindow::on_videoButton_released()
+{
 }

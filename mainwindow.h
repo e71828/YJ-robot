@@ -18,6 +18,9 @@
 #include <QString>
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
+#include <QGridLayout>
+#include <QMediaPlayer>
+#include <QVideoWidget>
 #include "qgc_udp_server.h"
 
 using namespace std;
@@ -47,8 +50,8 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    QString port;
-      //joy data
+    QString port;  //serial
+    QByteArray joy_data;
     int joy_1;
     int joy_2;
     int rotate_key;
@@ -64,6 +67,7 @@ public:
     int btn_1;
     int btn_2;
 
+    void find_serial();
     void open_serial();
     void close_serial();
 
@@ -93,7 +97,9 @@ private slots:
 
     void changeDuration(qint64 seconds);
 
+    void on_videoButton_released();
 
+    bool eventFilter(QObject *, QEvent *);
 
 private:
 
@@ -128,6 +134,14 @@ private:
     bool updateData;
 
     Ui::MainWindow *ui;
+
+    QVideoWidget *_vw1;
+//    QVideoWidget *_vw2;
+    QMediaPlayer *_player1;
+//    QMediaPlayer *_player2;
+    QGridLayout *layout;
+    const QNetworkRequest requestRtsp1;
+    const QNetworkRequest requestRtsp2;
 
 };
 
