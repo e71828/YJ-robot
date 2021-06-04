@@ -64,9 +64,11 @@ void qgc_udp_server::qgc_server_send_data()
      {
             btn_1 = 0; btn_2 = 0;
 
-             joy_x = remote_switch_key * remote_x /100;
-             joy_y = remote_switch_key * remote_y /100;
-             rotate_key = remote_key;
+             joy_x = remote_switch_key/2 * remote_x /100;
+             joy_y = remote_switch_key/2 * remote_y /100;
+             cam_1 = remote_cam_1;
+             cam_2 = remote_cam_2;
+             rotate_key = remote_key*100+remote_cam_2;
 
               knob_1 = remote_knob_1;
               knob_2 = remote_knob_2;
@@ -78,7 +80,7 @@ void qgc_udp_server::qgc_server_send_data()
             }
             else
             {
-                knob_3 =  remote_knob_3;
+                knob_3 =  remote_knob_3/15;
                 knob_4 = 0 ;
             }
                 cam_1 = remote_cam_1;
@@ -95,9 +97,10 @@ void qgc_udp_server::qgc_server_send_data()
             cam_1 = remote_cam_1;
             cam_2 = remote_cam_2;
       }
-     height_p=250.25; height_i=250.25; heigh_d=250.25; height_i_limit=100.25; height_out_limit=100.25;
-     motor_p=250.25; motor_i=250.25; motor_d=250.25; motor_i_limit=100.25; motor_out_limit=100.25;
-     locate_p=250.25; locate_i=250.25; locate_d=250.25; locate_i_limit=250.25; locate_out_limit=250.25;
+
+         height_p=20.25; height_i=0.3; heigh_d=15.25; height_i_limit=100; height_out_limit=200;//高度
+         motor_p=5; motor_i=0.5; motor_d=5; motor_i_limit=100.25; motor_out_limit=100.25;//前后
+         locate_p=20; locate_i=3; locate_d=15; locate_i_limit=100.25; locate_out_limit=250.25;//左右
 
     char char_data[512]="";
 
