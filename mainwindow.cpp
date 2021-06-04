@@ -48,7 +48,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
             QTimer *timer0 =new QTimer(this);			//新建一个定时器对象
             connect(timer0,&QTimer::timeout,qgc_message,&qgc_udp_server::qgc_server_send_data);
-            timer0->start(100);
+            timer0->start(20);
 
             //关闭设置菜单使能
             ui->OpenButton->setText(tr("关闭端口"));
@@ -165,11 +165,11 @@ void MainWindow::serial_read_data()
 
         sscanf(joy_data, "%[^,],%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%s\r\n",data_first,&joy_1,&joy_2,&rotate_key,
                &knob_1,&knob_2,&knob_3,&knob_4,&rotate_cam_1,&rotate_cam_2,&switch_key,&switch_1,&switch_2,&btn_1,&btn_2,data_last);
-        remote_x = joy_1;remote_y = joy_2;remote_key=rotate_key;remote_knob_1 = knob_1;remote_knob_2 = knob_2;remote_knob_3 = knob_3;remote_knob_4 = knob_4;
+        remote_x = joy_1;remote_y = joy_2;remote_key=rotate_key/10;remote_knob_1 = knob_1;remote_knob_2 = knob_2;remote_knob_3 = knob_3;remote_knob_4 = knob_4;
         remote_cam_1 = rotate_cam_1;remote_cam_2 = rotate_cam_2;remote_switch_key = switch_key;remote_switch_1 = switch_1;remote_switch_2 = switch_2;remote_btn_1 = btn_1;remote_btn_2 = btn_2;
 
         qDebug()<<  data_last;
-        serial_message(joy_1,joy_2,rotate_key,knob_1,knob_2,knob_3,knob_4,rotate_cam_1,rotate_cam_2,switch_key,switch_1,switch_2,btn_1,btn_2);
+        serial_message(joy_1,joy_2,remote_key,knob_1,knob_2,knob_3,knob_4,rotate_cam_1,rotate_cam_2,switch_key,switch_1,switch_2,btn_1,btn_2);
 
         joy_data.clear();
     } else{
