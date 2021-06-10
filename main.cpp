@@ -5,8 +5,8 @@
 #include <QStyle>
 #include <QScreen>
 #include <QGuiApplication>
-
-QString qgc_server_ip="192.168.31.99"; // 本地端口，接受姿态数据
+//QString qgc_server_ip="192.168.31.99"; // 本地端口，接受姿态数据
+// qgc_server_ip 被 host 放入 MainWindow 类中。
 int qgc_server_port = 8888;
 
 QString dest_server_ip="192.168.31.16"; //远程端口，发送控制数据

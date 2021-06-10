@@ -21,11 +21,12 @@
 #include <QGridLayout>
 #include <QMediaPlayer>
 #include <QVideoWidget>
+#include <QHostInfo>
 #include "qgc_udp_server.h"
 
 using namespace std;
 
-extern QString qgc_server_ip;
+//extern QString qgc_server_ip;
 extern int qgc_server_port;
 
 extern QString dest_server_ip;
@@ -73,6 +74,8 @@ public:
 
     void serial_write_data();
     void show_video();
+
+    QString find_IP();
 
     //recv sensor data
       int   uuv_state;
@@ -132,6 +135,8 @@ private:
 
     bool showColon;             //用于显示时间时是否显示“:”
     bool updateData;
+
+    QString host;
 
     Ui::MainWindow *ui;
 

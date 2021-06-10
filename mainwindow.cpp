@@ -35,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     //qgc[开启]/[关闭]按钮
+    host = find_IP();
     ui->lineEdit_qgc_server_port->setText(QString::number(qgc_server_port));
     ui->lineEdit_qgc_server_port->setAlignment(Qt::AlignCenter);
     connect(ui->OpenButton,&QPushButton::clicked,this,[this]()
@@ -42,7 +43,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
         if(ui->OpenButton->text()=="打开端口")
         {
-            qgc_message = new qgc_udp_server;
+            qgc_message = new qgc_udp_server(host);
             connect(qgc_message,&qgc_udp_server::qgc_server_recv_message,this,&MainWindow::update_data);
             updateData =1;
 
@@ -102,6 +103,24 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
     }
 
     return QWidget::eventFilter(obj, event);
+}
+
+QString MainWindow::find_IP()
+{
+    QString localhostname =  QHostInfo::localHostName();
+    QString localhostIP;
+    quint32 rangeMin = QHostAddress("192.168.31.0").toIPv4Address();
+    quint32 rangeMax = QHostAddress("192.168.31.255").toIPv4Address();
+    QList<QHostAddress> hostList = QHostInfo::fromName(localhostname).addresses();
+    foreach (const QHostAddress& address, hostList) {
+        if (address.protocol() == QAbstractSocket::IPv4Protocol && address.isLoopback() == false) {
+             if(address.toIPv4Address() >= rangeMin && address.toIPv4Address()<= rangeMax){
+                 localhostIP = address.toString();
+    //                 qDebug()<< "localhostIP" << localhostIP;
+             }
+        }
+    }
+    return localhostIP;
 }
 
 void MainWindow::find_serial()
@@ -433,7 +452,7 @@ void MainWindow::show_time()
         showColon=true;
     }
     Text.prepend(QString::number(qgc_server_port) + "  Time: ");
-    Text.prepend(qgc_server_ip + ":");
+    Text.prepend(host + ":");
     Text.prepend("Local UDP Address: ");
     ui->label_status->setText(Text);
     QFont NanumGothic_R("NanumGothic-Regular", 10, QFont::Normal);
@@ -461,18 +480,20 @@ void MainWindow::show_video()
     _player1->setVideoOutput(_vw1);
 //    _player2->setVideoOutput(_vw2);
     // Links de RTSP e Videos
-    QString nbSource1 =dest_server_ip;
+    nbSource1 =dest_server_ip;
     nbSource1.append(":" + QString::number(qgc_video1_port));
     nbSource1.prepend("rtsp://");
     nbSource1.append("/unicast");
-    QString nbSource2 =dest_server_ip;
+
+    nbSource2 =dest_server_ip;
     nbSource2.append(":" + QString::number(qgc_video2_port));
     nbSource2.prepend("rtsp://");
     nbSource2.append("/unicast");
+
     const QUrl url1 = QUrl(nbSource1);
     qDebug()<<nbSource1;
-//    const QUrl url2 = QUrl(nbSource2);
       const QNetworkRequest requestRtsp1(url1);
+//      const QNetworkRequest requestRtsp2(url2);
       _player1->setMedia(requestRtsp1);
 //    _player2->setMedia(requestRtsp2);
       _player1->play();

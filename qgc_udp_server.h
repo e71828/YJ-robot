@@ -12,7 +12,7 @@ class qgc_udp_server : public QObject
     Q_OBJECT
 
 public:
-    explicit qgc_udp_server(QObject *parent = nullptr);
+    explicit qgc_udp_server(QString host, QObject *parent = nullptr);
     ~qgc_udp_server();
 
 //    void qgc_server_send_data();
@@ -41,6 +41,7 @@ private:
 
 
     QUdpSocket *socket;
+    QString qgc_server_ip;
 
 };
 
