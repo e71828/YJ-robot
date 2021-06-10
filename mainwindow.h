@@ -122,6 +122,10 @@ private:
     QString str_switch_2;
     QString str_btn_1;
     QString str_btn_2;
+    int temp_depth_key0;
+    int temp_depth_key1;
+    int temp_depth_key2;
+    bool depth_init;
 
 
     qgc_udp_server * qgc_message;

@@ -78,6 +78,8 @@ MainWindow::MainWindow(QWidget *parent) :
     //置零
       //update_data(0, 0.0, 0.0, 0.0, 0.0, 0.0);
 
+    //串口数据矫正
+      depth_init=true;
 }
 
 void sleep(unsigned int msec)
@@ -186,6 +188,43 @@ void MainWindow::serial_read_data()
                &knob_1,&knob_2,&knob_3,&knob_4,&rotate_cam_1,&rotate_cam_2,&switch_key,&switch_1,&switch_2,&btn_1,&btn_2,data_last);
         remote_x = joy_1;remote_y = joy_2;remote_key=rotate_key/10;remote_knob_1 = knob_1;remote_knob_2 = knob_2;remote_knob_3 = knob_3;remote_knob_4 = knob_4;
         remote_cam_1 = rotate_cam_1;remote_cam_2 = rotate_cam_2;remote_switch_key = switch_key;remote_switch_1 = switch_1;remote_switch_2 = switch_2;remote_btn_1 = btn_1;remote_btn_2 = btn_2;
+
+        if(depth_init){
+            temp_depth_key0 = rotate_key;
+            temp_depth_key1 = rotate_key;
+            temp_depth_key2 = rotate_key;
+            remote_key = 0;
+            depth_init = false;
+        }
+
+        if(!rotate_key){
+            temp_depth_key0 = 0;
+            temp_depth_key1 = 0;
+            temp_depth_key2 = 0;
+            remote_key = 0;
+        }
+
+        if(temp_depth_key2 == temp_depth_key1 && temp_depth_key1 == temp_depth_key0){
+            if(rotate_key > temp_depth_key0) remote_key++;
+            if(rotate_key < temp_depth_key0) remote_key--;
+        }
+
+        int m =10;
+        if(knob_3 < m && knob_3 > -m){
+            remote_knob_3 = 0;
+        }else{
+            knob_3 < 0 ? remote_knob_3 = knob_3 + m : knob_3 - m;
+        }
+        if(knob_4 < m && knob_4 > -m){
+            remote_knob_4 = 0;
+        }else{
+            knob_4 < 0 ? remote_knob_4 = knob_4 + m : knob_4 - m;
+        }
+
+        temp_depth_key2 = temp_depth_key1;
+        temp_depth_key1 = temp_depth_key0;
+        temp_depth_key0 = rotate_key;
+
 
         qDebug()<<  data_last;
         serial_message(joy_1,joy_2,remote_key,knob_1,knob_2,knob_3,knob_4,rotate_cam_1,rotate_cam_2,switch_key,switch_1,switch_2,btn_1,btn_2);
