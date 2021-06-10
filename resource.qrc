@@ -9,4 +9,7 @@
         <file alias="NanumGothic-Regular">resources/fonts/NanumGothic-Regular.ttf</file>
         <file alias="NanumGothic-Bold">resources/fonts/NanumGothic-Bold.ttf</file>
     </qresource>
+    <qresource prefix="/qt/etc">
+        <file>qt.conf</file>
+    </qresource>
 </RCC>

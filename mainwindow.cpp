@@ -261,6 +261,10 @@ void MainWindow::serial_message(int joy_1,int joy_2,int rotate_key,int knob_1,in
     //ui->lineEdit_switch_1->setText(str_switch_1.setNum(switch_1));
         ui->lineEdit_switch_1->setFont(FontSerialData);
         ui->lineEdit_switch_1->setAlignment(Qt::AlignCenter);
+    ui->expected_depth->setText(str_Height.setNum(rotate_cam_2 + rotate_key*100) + " mm");
+        QFont serifFont("Times", 16, QFont::Normal);
+        ui->expected_depth->setFont(serifFont);
+        ui->expected_depth->setAlignment(Qt::AlignCenter);
 
         QPalette org=QPalette();
         org.setColor(QPalette::Base,Qt::white);
@@ -412,18 +416,18 @@ void MainWindow::update_data(int uuv_state,float uuv_roll,float uuv_pitch,float 
             //ui->lineEdit_state->setStyleSheet(QString(":focus{ background-color: red; }"));
         }
 
-    ui->lineEdit_roll->setText(str_roll.setNum(uuv_roll));
+    ui->lineEdit_roll->setText(str_roll.setNum(uuv_roll,'f',3));
         ui->lineEdit_roll->setFont(FontUdpData);
         ui->lineEdit_roll->setAlignment(Qt::AlignCenter);
-    ui->lineEdit_pitch->setText(str_pitch.setNum(uuv_pitch));
+    ui->lineEdit_pitch->setText(str_pitch.setNum(uuv_pitch,'f',3));
         ui->lineEdit_pitch->setFont(FontUdpData);
         ui->lineEdit_pitch->setAlignment(Qt::AlignCenter);
-    ui->lineEdit_yaw->setText(str_yaw.setNum(uuv_yaw));
+    ui->lineEdit_yaw->setText(str_yaw.setNum(uuv_yaw,'f',3));
         ui->lineEdit_yaw->setFont(FontUdpData);
         ui->lineEdit_yaw->setAlignment(Qt::AlignCenter);
 //        qDebug()<<uuv_yaw;
 //        if (uuv_depth < 1e-2 || uuv_depth > 1e9) uuv_depth =0;
-    ui->lineEdit_depth->setText(str_depth.setNum(uuv_depth));
+    ui->lineEdit_depth->setText(str_depth.setNum(uuv_depth,'f',2));
         ui->lineEdit_depth->setFont(FontUdpData);
         ui->lineEdit_depth->setAlignment(Qt::AlignCenter);
 }

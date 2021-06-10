@@ -15,15 +15,9 @@ int dest_server_port = 8888;
 int qgc_video1_port = 8555;
 int qgc_video2_port = 8556;
 
-
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-
-    QFont font  = a.font();
-        font.setPointSize(14);
-        a.setFont(font);
-
 
     QPixmap pixmap(":/icons/splash.png");
 

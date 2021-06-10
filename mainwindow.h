@@ -107,6 +107,7 @@ private slots:
 private:
 
     QSerialPort *serial;
+    QString str_Height;
     QString str_joy_1;
     QString str_joy_2;
     QString str_rotate_key;
@@ -140,13 +141,8 @@ private:
 
     Ui::MainWindow *ui;
 
-    QVideoWidget *_vw1;
-//    QVideoWidget *_vw2;
-    QMediaPlayer *_player1;
-//    QMediaPlayer *_player2;
-    QGridLayout *layout;
-    const QNetworkRequest requestRtsp1;
-    const QNetworkRequest requestRtsp2;
+    QString nbSource1;
+    QString nbSource2;
 
 };
 
