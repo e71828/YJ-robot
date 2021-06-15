@@ -29,14 +29,17 @@ RC_ICONS = resources/icons/qgroundcontrol.ico
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-        qgc_udp_server.cpp
+        qgc_udp_server.cpp \
+        secondvideo.cpp
 
 HEADERS += \
         mainwindow.h \
-        qgc_udp_server.h
+        qgc_udp_server.h \
+        secondvideo.h
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+        secondvideo.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

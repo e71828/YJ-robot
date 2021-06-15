@@ -551,4 +551,14 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_videoButton_released()
 {
+    show_video();
+}
+
+void MainWindow::on_secondVideo_clicked()
+{
+//    secondvideo secondDialog;
+//    secondDialog.setModal(true);
+//    secondDialog.exec();
+    secondVideo = new secondvideo(nbSource2,this);
+    secondVideo->show();
 }

@@ -23,6 +23,7 @@
 #include <QVideoWidget>
 #include <QHostInfo>
 #include "qgc_udp_server.h"
+#include "secondvideo.h"
 
 using namespace std;
 
@@ -104,6 +105,8 @@ private slots:
 
     bool eventFilter(QObject *, QEvent *);
 
+    void on_secondVideo_clicked();
+
 private:
 
     QSerialPort *serial;
@@ -148,6 +151,7 @@ private:
     QString nbSource1;
     QString nbSource2;
 
+    secondvideo *secondVideo;
 };
 
 #endif // MAINWINDOW_H
