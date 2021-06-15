@@ -2,6 +2,8 @@
     <qresource prefix="/icons">
         <file alias="qroundcontrol.ico">resources/icons/qgroundcontrol.ico</file>
         <file alias="splash.png">resources/icons/splash.png</file>
+        <file alias="leftArrow.png">resources/icons/left-filled-arrow-triangle-pngrepo-com.png</file>
+        <file alias="rightArrow.png">resources/icons/play-button-arrow-pngrepo-com.png</file>
     </qresource>
     <qresource prefix="/fonts">
         <file alias="opensans">resources/fonts/OpenSans-Regular.ttf</file>

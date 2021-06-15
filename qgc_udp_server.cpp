@@ -74,7 +74,7 @@ void qgc_udp_server::qgc_server_send_data()
             }
             else
             {
-                knob_3 =  remote_knob_3/15;
+                knob_3 = remote_knob_3/3;
                 knob_4 = 0 ;
             }
                 cam_1 = remote_cam_1;

@@ -25,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
             open_serial();
             //关闭设置菜单使能
             ui->OpenSerialButton->setText(tr("关闭串口"));
+            ui->spinBox->setValue(0);
         }
         else
         {
@@ -79,7 +80,10 @@ MainWindow::MainWindow(QWidget *parent) :
       //update_data(0, 0.0, 0.0, 0.0, 0.0, 0.0);
 
     //串口数据矫正
-      depth_init=true;
+    //depth_init=true;
+
+      connect(ui->verticalSlider,SIGNAL(valueChanged(int)),ui->spinBox,SLOT(setValue(int)));
+      connect(ui->spinBox,SIGNAL(valueChanged(int)),ui->verticalSlider,SLOT(setValue(int)));
 }
 
 void sleep(unsigned int msec)
@@ -189,25 +193,25 @@ void MainWindow::serial_read_data()
         remote_x = joy_1;remote_y = joy_2;remote_key=rotate_key/10;remote_knob_1 = knob_1;remote_knob_2 = knob_2;remote_knob_3 = knob_3;remote_knob_4 = knob_4;
         remote_cam_1 = rotate_cam_1;remote_cam_2 = rotate_cam_2;remote_switch_key = switch_key;remote_switch_1 = switch_1;remote_switch_2 = switch_2;remote_btn_1 = btn_1;remote_btn_2 = btn_2;
 
-        if(depth_init){
-            temp_depth_key0 = rotate_key;
-            temp_depth_key1 = rotate_key;
-            temp_depth_key2 = rotate_key;
-            remote_key = 0;
-            depth_init = false;
-        }
+//        if(depth_init){
+//            temp_depth_key0 = rotate_key;
+//            temp_depth_key1 = rotate_key;
+//            temp_depth_key2 = rotate_key;
+//            remote_key = 0;
+//            depth_init = false;
+//        }
 
-        if(!rotate_key){
-            temp_depth_key0 = 0;
-            temp_depth_key1 = 0;
-            temp_depth_key2 = 0;
-            remote_key = 0;
-        }
+//        if(!rotate_key){
+//            temp_depth_key0 = 0;
+//            temp_depth_key1 = 0;
+//            temp_depth_key2 = 0;
+//            remote_key = 0;
+//        }
 
-        if(temp_depth_key2 == temp_depth_key1 && temp_depth_key1 == temp_depth_key0){
-            if(rotate_key > temp_depth_key0) remote_key++;
-            if(rotate_key < temp_depth_key0) remote_key--;
-        }
+//        if(temp_depth_key2 == temp_depth_key1 && temp_depth_key1 == temp_depth_key0){
+//            if(rotate_key > temp_depth_key0) remote_key++;
+//            if(rotate_key < temp_depth_key0) remote_key--;
+//        }
 
         int m =10;
         if(knob_3 < m && knob_3 > -m){
@@ -221,11 +225,12 @@ void MainWindow::serial_read_data()
             knob_4 < 0 ? remote_knob_4 = knob_4 + m : knob_4 - m;
         }
 
-        temp_depth_key2 = temp_depth_key1;
-        temp_depth_key1 = temp_depth_key0;
-        temp_depth_key0 = rotate_key;
+//        temp_depth_key2 = temp_depth_key1;
+//        temp_depth_key1 = temp_depth_key0;
+//        temp_depth_key0 = rotate_key;
 
 
+        remote_key =ui->spinBox->value();
         qDebug()<<  data_last;
         serial_message(joy_1,joy_2,remote_key,knob_1,knob_2,knob_3,knob_4,rotate_cam_1,rotate_cam_2,switch_key,switch_1,switch_2,btn_1,btn_2);
 
@@ -243,9 +248,12 @@ void MainWindow::close_serial()
     serial->clear();
     serial->close();
     serial->deleteLater();
+    remote_knob_1=remote_knob_2=remote_x=remote_y=remote_knob_3=remote_knob_4=0;
     ui->lineEdit_joy_1->clear();
     ui->lineEdit_joy_2->clear();
-    ui->lineEdit_rotate_key->clear();
+//    ui->lineEdit_rotate_key->clear();
+    ui->expected_depth->clear();
+    ui->spinBox->setValue(0);
     ui->lineEdit_knob_1->clear();
     ui->lineEdit_knob_2->clear();
     ui->lineEdit_knob_3->clear();
@@ -271,9 +279,9 @@ void MainWindow::serial_message(int joy_1,int joy_2,int rotate_key,int knob_1,in
     ui->lineEdit_joy_2->setText(str_joy_2.setNum(joy_2));
         ui->lineEdit_joy_2->setFont(FontSerialData);
         ui->lineEdit_joy_2->setAlignment(Qt::AlignCenter);
-    ui->lineEdit_rotate_key->setText(str_rotate_key.setNum(rotate_key));
-        ui->lineEdit_rotate_key->setFont(FontSerialData);
-        ui->lineEdit_rotate_key->setAlignment(Qt::AlignCenter);
+//    ui->lineEdit_rotate_key->setText(str_rotate_key.setNum(rotate_key));
+//        ui->lineEdit_rotate_key->setFont(FontSerialData);
+//        ui->lineEdit_rotate_key->setAlignment(Qt::AlignCenter);
     ui->lineEdit_knob_1->setText(str_knob_1.setNum(knob_1));
         ui->lineEdit_knob_1->setFont(FontSerialData);
         ui->lineEdit_knob_1->setAlignment(Qt::AlignCenter);
@@ -303,7 +311,7 @@ void MainWindow::serial_message(int joy_1,int joy_2,int rotate_key,int knob_1,in
     ui->expected_depth->setText(str_Height.setNum(rotate_cam_2 + rotate_key*100) + " mm");
         QFont serifFont("Times", 16, QFont::Normal);
         ui->expected_depth->setFont(serifFont);
-        ui->expected_depth->setAlignment(Qt::AlignCenter);
+        //ui->expected_depth->setAlignment(Qt::AlignCenter);
 
         QPalette org=QPalette();
         org.setColor(QPalette::Base,Qt::white);
@@ -330,7 +338,7 @@ void MainWindow::serial_message(int joy_1,int joy_2,int rotate_key,int knob_1,in
             ui->lineEdit_switch_1->setPalette(pass);
             ui->lineEdit_joy_1->setPalette(org);
             ui->lineEdit_joy_2->setPalette(org);
-            ui->lineEdit_rotate_key->setPalette(org);
+//            ui->lineEdit_rotate_key->setPalette(org);
             ui->lineEdit_knob_1->setPalette(org);
             ui->lineEdit_knob_2->setPalette(org);
             ui->lineEdit_rotate_cam_1->setPalette(org);
@@ -341,7 +349,7 @@ void MainWindow::serial_message(int joy_1,int joy_2,int rotate_key,int knob_1,in
         {
             ui->lineEdit_joy_1->setPalette(error);
             ui->lineEdit_joy_2->setPalette(error);
-            ui->lineEdit_rotate_key->setPalette(error);
+//            ui->lineEdit_rotate_key->setPalette(error);
             ui->lineEdit_knob_1->setPalette(error);
             ui->lineEdit_knob_2->setPalette(error);
             ui->lineEdit_knob_3->setPalette(error);
