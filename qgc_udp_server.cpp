@@ -92,9 +92,9 @@ void qgc_udp_server::qgc_server_send_data()
             cam_2 = remote_cam_2;
       }
 
-         height_p=20.25; height_i=0.3; heigh_d=15.25; height_i_limit=100; height_out_limit=200;//高度
-         motor_p=5; motor_i=0.5; motor_d=5; motor_i_limit=100.25; motor_out_limit=100.25;//前后
-         locate_p=20; locate_i=3; locate_d=15; locate_i_limit=100.25; locate_out_limit=250.25;//左右
+         height_p=600; height_i=5; heigh_d=600; height_i_limit=170000; height_out_limit=170000;//高度
+         motor_p=0.6; motor_i=1; motor_d=1.5; //motor_i_limit=100.25; motor_out_limit=100.25;//前后的定航向
+         locate_p=2; locate_i=2; locate_d=1; //locate_i_limit=100.25; locate_out_limit=250.25;//左右航向变化
 
     char char_data[512]="";
 
