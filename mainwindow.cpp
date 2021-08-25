@@ -219,11 +219,11 @@ void MainWindow::serial_read_data()
         }else{
             knob_3 < 0 ? remote_knob_3 = knob_3 + m : remote_knob_3 = knob_3 - m;
         }
-        if(knob_4 < m && knob_4 > -m){
-            remote_knob_4 = 0;
-        }else{
-            knob_4 < 0 ? remote_knob_4 = -36 : remote_knob_4 = 36;
-        }
+        //if(knob_4 < m && knob_4 > -m){
+       // ///    remote_knob_4 = 0;
+       // }else{
+      //      knob_4 < 0 ? remote_knob_4 = -36 : remote_knob_4 = 36;
+      //  }
 
 //        temp_depth_key2 = temp_depth_key1;
 //        temp_depth_key1 = temp_depth_key0;
